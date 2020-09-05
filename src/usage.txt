@@ -1,0 +1,31 @@
+const s1 = 'foob';
+const s2 = '\u{1F601} \u{1F4A3}!'; '😁 💣!'
+const buf = Uint32Array.from([0xFFFFFFF8]).buffer; console.log(new Uint8Array(buf).toString());
+
+const e1 = encode(s1);  console.log(e1);
+const e2 = encode(s1, { nopadding: true }); console.log(e2);
+const e3 = encode(s2); console.log(e3);
+const e4 = encode(s2, { urlsafe: true, nopadding: true }); console.log(e4);
+
+const t1 = decode(e1, 'utf-8'); console.log(t1);
+const t2 = decode(e2, 'utf-8'); console.log(t2);
+const t3 = decode(e3, 'utf-8'); console.log(t3);
+const t4 = decode(e4, 'utf-8'); console.log(t4);
+
+const b1 = decode(e1); console.log(new Uint8Array(b1).toString());
+const b2 = decode(e2); console.log(new Uint8Array(b2).toString());
+const b3 = decode(e3); console.log(new Uint8Array(b3).toString());
+const b4 = decode(e4); console.log(new Uint8Array(b4).toString());
+
+const x1 = encode(b1); console.log(x1);
+const x2 = encode(b3, { nopadding: true }); console.log(x2);
+const x3 = encode(buf); console.log(x3);
+const x4 = encode(buf, { urlsafe: true }); console.log(x4);
+
+const v1 = validate('Zm9vYg=='); console.log(v1);
+const v2 = validate('Zm9vYg'); console.log(v2);
+const v3 = validate('Zm9vYg', { nopadding: false }); console.log(v3);
+const v4 = validate('Zm9vYh=='); console.log(v4);
+const v5 = validate('8J-YgSDwn5KjIQ'); console.log(v5);
+const v6 = validate('8J-YgSDwn5KjIQ', { urlsafe: false } ); console.log(v6);
+const v7 = validate('8J+YgSDwn5KjIQ', { urlsafe: true } ); console.log(v7);
