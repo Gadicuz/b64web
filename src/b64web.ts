@@ -37,52 +37,54 @@ export function validate(b64s: string, opt?: Options): boolean {
 /** Decodes BASE64/BASE64URL ASCII string, auto-detects BASE64URL encoding.
  *
  * Every 4 input symbols are converted to 3 output bytes.
- * Output bytes can be interpreted as `utf-8 data` and converted to text string.
+ * Output bytes can be decoded to a text string.
  *
  * @param b64s - input BASE64/BASE64URL encoded string
- * @param text - interpret decoded data as `utf-8 data` and return text string
- * @returns decoded binary data or text string
+ * @param decoder - text string encoding label or decoder
+ * @returns binary data or text string
  */
 export function decode(b64s: string): ArrayBuffer;
-export function decode(b64s: string, text: 'utf-8'): string;
-export function decode(b64s: string, text?: 'utf-8'): ArrayBuffer | string {
+export function decode(b64s: string, decoder: string | TextDecoder): string;
+export function decode(b64s: string, decoder?: string | TextDecoder): ArrayBuffer | string {
   if (!/[+/]/.test(b64s)) b64s = b64s.replace(/-/g, '+').replace(/_/g, '/');
   b64s += '='.repeat(-b64s.length & 3);
   const buf = Uint8Array.from(atob(b64s), (c) => c.charCodeAt(0));
-  return text ? btos(buf) : buf.buffer;
+  return decoder ? btos(buf, decoder) : buf.buffer;
 }
 
 /** Encodes binary array or text string to BASE64/BASE64URL ASCII string.
  *
- * If input data is a text string, the string is converted to utf-8 binary data.
+ * If input data is a text string, the string is converted to binary data according to opt.encoder, 'utf-8' by default.
  * Every 3 input bytes are converted to 4 output symbols.
  *
  * @param data - input binary data or text string
- * @param opt - encoding options
+ * @param opt - encoding options and text encoder
  * @returns BASE64 or BASE64URL encoded string
  */
-export function encode(data: ArrayBuffer | string, opt?: Options): string {
-  let s = btoa(String.fromCharCode(...new Uint8Array(typeof data === 'string' ? stob(data) : data)));
+export function encode(data: ArrayBuffer | string, opt?: Options & { encoder?: `utf-8` | TextEncoder }): string {
   opt = opt || {};
+  let s = btoa(String.fromCharCode(...new Uint8Array(typeof data === 'string' ? stob(data, opt.encoder) : data)));
   if (opt.urlsafe) s = s.replace(/\+/g, '-').replace(/\//g, '_');
   if (opt.nopadding === true) s = s.replace(/=/g, '');
   return s;
 }
 
-/** Converts binary buffer to text string. Buffer data is UTF-8 encoded by default.
+/** Converts binary buffer to text string. Buffer data is utf-8 encoded by default.
  * @param buf - input binary data
- * @param decoder - custom decoder
+ * @param decoder - encoding label or custom decoder
  * @returns text string
  */
-export function btos(buf: ArrayBuffer, decoder?: TextDecoder): string {
-  return (decoder || new TextDecoder()).decode(buf);
+export function btos(buf: ArrayBuffer, decoder?: string | TextDecoder): string {
+  decoder = typeof decoder === 'string' ? new TextDecoder(decoder) : decoder || new TextDecoder();
+  return decoder.decode(buf);
 }
 
-/** Converts text string to binary buffer. Buffer data is UTF-8 encoded by default.
+/** Converts text string to binary buffer. Buffer data is utf-8 encoded by default.
  * @param s - input string
- * @param encoder - custom encoder
+ * @param encoder - `utf-8` or custom encoder
  * @returns binary data
  */
-export function stob(s: string, encoder?: TextEncoder): ArrayBuffer {
-  return (encoder || new TextEncoder()).encode(s);
+export function stob(s: string, encoder?: `utf-8` | TextEncoder): ArrayBuffer {
+  encoder = encoder === 'utf-8' ? new TextEncoder() : encoder || new TextEncoder();
+  return encoder.encode(s);
 }

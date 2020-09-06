@@ -25,6 +25,41 @@ npm i b64web
 # Usage
 
 ```typescript
+let b64s: string; // Base64/Base64URL encoded ASCII string
+let data: ArrayBuffer; // binary data
+let text: string; //text string data
+```
+
+### Decoding Base64 data
+
+```typescript
+// decode 'b64s' to binary data
+data = decode(b64s);
+// decode 'b64s' to binary data, convert the data to text string using text decoder 'decoder'
+text = decode(b64s, decoder);
+```
+
+### Encoding Base64 data
+
+```typescript
+// encode binary data 'data' to Base64 ASCII string
+b64s = encode(data);
+// encode binary data 'data' to Base64URL ASCII string
+b64s = encode(data, { urlsafe: true }); 
+// encode text sting 'text' to binary data, convert to Base64 ASCII string
+b64s = encode(text);
+```
+
+### Validating Base64 data
+
+```typescript
+// validate Base64/Base64URL encoded ASCII string
+let valid = validate(b64s);
+```
+
+## Examples
+
+```typescript
 import * as B64 from 'b64web';
 
 const s1 = 'foob';
@@ -71,13 +106,11 @@ const d1 = B64.btos(c1); // 'foob'
 
 Encoding a text string is equivalent to converting the text string to a binary buffer and encoding the buffer.
 ```
-encode(text) === encode(stob(text))
+encode(text, { encoder }) === encode(stob(text, encoder))
 ```
 
 Decoding Base64 data to text string is equivalent to decoding the data to binary buffer and converting the buffer.
 
 ```
-decode(data, 'utf-8') === btos(decode(data))
+decode(data, decoder) === btos(decode(data), decoder)
 ```
-
-`btos()` and `stob()` accept custom text encoder/decoder so it's possible to process binary data not only for `utf-8` encoded text strings.
